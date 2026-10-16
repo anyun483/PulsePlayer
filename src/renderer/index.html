@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="neon">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' pulse-media: blob: data:;" />
+  <title>PulsePlayer</title>
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/themes.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- 标题栏 -->
+    <header class="titlebar">
+      <div class="tb-left">
+        <div class="logo"><span class="logo-dot"></span> PULSE<span class="logo-thin">PLAYER</span></div>
+      </div>
+      <div class="tb-center">
+        <div class="now-mini" id="nowMini">
+          <span class="nm-title" id="nmTitle">未播放</span>
+          <span class="nm-artist" id="nmArtist">导入音乐或点击播放示例曲</span>
+        </div>
+      </div>
+      <div class="tb-right">
+        <button class="tb-btn" id="btnPlaylist" title="播放列表 (L)">☰</button>
+        <div class="winctl">
+          <button class="wc" id="btnMin" title="最小化">─</button>
+          <button class="wc" id="btnMax" title="最大化">▢</button>
+          <button class="wc wc-close" id="btnClose" title="关闭">✕</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="main">
+      <!-- 可视化舞台 -->
+      <section class="stage" id="stage">
+        <canvas id="viz"></canvas>
+
+        <!-- 空状态 -->
+        <div class="empty" id="empty">
+          <div class="empty-inner">
+            <div class="eq-demo" id="eqDemo">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <h1>让音乐看得见</h1>
+            <p>3 种风格 · 20 套节奏脉冲可视化</p>
+            <div class="empty-actions">
+              <button class="btn btn-primary" id="btnDemo">▶ 播放内置示例曲</button>
+              <button class="btn" id="btnFolder">📂 导入文件夹</button>
+              <button class="btn" id="btnFiles">🎵 选择文件</button>
+            </div>
+            <p class="hint">也可以直接把音乐文件拖进窗口</p>
+          </div>
+        </div>
+
+        <!-- 拖拽遮罩 -->
+        <div class="dropzone" id="dropzone">
+          <div class="dz-inner">
+            <div class="dz-icon">⬇</div>
+            <div>松开以导入音乐</div>
+          </div>
+        </div>
+
+        <!-- 当前曲目浮层 -->
+        <div class="overlay-info" id="overlayInfo">
+          <div class="oi-inner" id="oiInner">
+            <div class="oi-art" id="oiArt"><span id="oiArtIcon">♪</span></div>
+            <div class="oi-text">
+              <div class="oi-title" id="oiTitle">—</div>
+              <div class="oi-artist" id="oiArtist">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BPM 实时显示 -->
+        <div class="bpm-badge" id="bpmBadge">
+          <span class="bpm-num" id="bpmNum">---</span><span class="bpm-lbl">BPM</span>
+        </div>
+      </section>
+
+      <!-- 播放列表侧栏 -->
+      <aside class="playlist" id="playlist">
+        <div class="pl-head">
+          <div class="pl-title">
+            播放列表
+            <span class="pl-count" id="plCount">0</span>
+          </div>
+          <button class="pl-close" id="btnClosePl" title="关闭列表">✕</button>
+        </div>
+
+        <div class="pl-actions">
+          <button class="pl-btn" id="btnAddFolder" title="导入文件夹">📂 文件夹</button>
+          <button class="pl-btn" id="btnAddFiles" title="添加文件">🎵 文件</button>
+          <button class="pl-btn pl-danger" id="btnClear" title="清空列表">清空</button>
+        </div>
+
+        <div class="pl-search">
+          <input type="text" id="plFilter" placeholder="搜索歌曲 / 歌手…" spellcheck="false" />
+        </div>
+
+        <div class="pl-list" id="plList"></div>
+
+        <div class="pl-foot">
+          <span id="plSummary">列表为空</span>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 沉浸模式顶部信息条 -->
+    <header class="immersive-bar" id="immersiveBar">
+      <div class="ib-left">
+        <div class="ib-title" id="ibTitle">—</div>
+        <div class="ib-artist" id="ibArtist">—</div>
+      </div>
+      <div class="ib-right">
+        <span class="ib-preset" id="ibPreset"></span>
+        <button class="ib-btn" id="ibExit" title="退出全屏 (Esc / F)">✕</button>
+      </div>
+    </header>
+
+    <!-- 播放控制条 -->
+    <footer class="controlbar">
+      <div class="cb-progress">
+        <span class="t-label" id="tCur">0:00</span>
+        <div class="seek" id="seek">
+          <div class="seek-buffer" id="seekBuffer"></div>
+          <div class="seek-fill" id="seekFill"></div>
+          <div class="seek-knob" id="seekKnob"></div>
+        </div>
+        <span class="t-label" id="tDur">0:00</span>
+      </div>
+
+      <div class="cb-controls">
+        <button class="cb-btn" id="btnShuffle" title="随机播放 (S)">
+          <svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+        </button>
+        <button class="cb-btn" id="btnPrev" title="上一首 (←)">
+          <svg viewBox="0 0 24 24"><path d="M19 20L9 12l10-8zM5 19V5"/></svg>
+        </button>
+        <button class="cb-btn cb-play" id="btnPlay" title="播放/暂停 (空格)">
+          <svg class="i-play" viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>
+          <svg class="i-pause" viewBox="0 0 24 24"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>
+        </button>
+        <button class="cb-btn" id="btnNext" title="下一首 (→)">
+          <svg viewBox="0 0 24 24"><path d="M5 4l10 8-10 8zM19 5v14"/></svg>
+        </button>
+        <button class="cb-btn" id="btnRepeat" title="循环模式 (R)">
+          <svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg>
+          <span class="repeat-badge" id="repeatBadge">1</span>
+        </button>
+      </div>
+
+      <div class="cb-right">
+        <button class="cb-btn cb-tool" id="btnVis" title="可视化设置 (V)">
+          <svg viewBox="0 0 24 24"><path d="M3 12h2l2-7 3 14 3-10 2 6 2-3h4"/></svg>
+        </button>
+        <button class="cb-btn cb-tool" id="btnTheme" title="切换风格 (T)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 000 18z" fill="currentColor"/></svg>
+        </button>
+        <button class="cb-btn cb-tool" id="btnFullscreen" title="沉浸全屏 (F)">
+          <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 00-2 2v3M16 3h3a2 2 0 012 2v3M8 21H5a2 2 0 01-2-2v-3M16 21h3a2 2 0 002-2v-3"/></svg>
+        </button>
+        <div class="volume">
+          <button class="cb-btn" id="btnMute" title="静音 (M)">
+            <svg class="i-vol" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 8a5 5 0 010 8"/></svg>
+            <svg class="i-mute" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM17 9l5 6M22 9l-5 6"/></svg>
+          </button>
+          <div class="vol-seek" id="volSeek">
+            <div class="vol-fill" id="volFill"></div>
+            <div class="vol-knob" id="volKnob"></div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 可视化设置面板 -->
+  <div class="panel" id="visPanel">
+    <div class="panel-head">
+      <div class="panel-title">可视化</div>
+      <button class="panel-close" id="btnCloseVis">✕</button>
+    </div>
+
+    <div class="panel-sec">
+      <div class="panel-label">风格</div>
+      <div class="theme-tabs" id="themeTabs">
+        <button class="ttab" data-theme="neon">
+          <span class="ttab-dot td-neon"></span>霓虹赛博
+        </button>
+        <button class="ttab" data-theme="minimal">
+          <span class="ttab-dot td-minimal"></span>极简暗色
+        </button>
+        <button class="ttab" data-theme="retro">
+          <span class="ttab-dot td-retro"></span>复古终端
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-sec">
+      <div class="panel-label">预设</div>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <div class="panel-sec">
+      <div class="panel-label">
+        灵敏度
+        <span class="panel-val" id="sensVal">1.00</span>
+      </div>
+      <input type="range" id="sensSlider" min="0.5" max="2.2" step="0.05" value="1" />
+      <div class="panel-note">调高后鼓点触发更频繁，低音更活跃</div>
+    </div>
+  </div>
+
+  <!-- 频谱状态读数（隐藏式 HUD，调试观感） -->
+  <div class="hud" id="hud">
+    <div class="hud-row"><span>FFT</span><b id="hudFps">60</b> fps</div>
+    <div class="hud-row"><span>BASS</span><b id="hudBass">0.00</b></div>
+    <div class="hud-row"><span>MID</span><b id="hudMid">0.00</b></div>
+    <div class="hud-row"><span>TREB</span><b id="hudTreble">0.00</b></div>
+    <div class="hud-row"><span>FLUX</span><b id="hudFlux">0.00</b></div>
+  </div>
+
+  <!-- toast -->
+  <div class="toast" id="toast"></div>
+
+  <audio id="audio" crossorigin="anonymous"></audio>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

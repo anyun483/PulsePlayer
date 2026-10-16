@@ -1,0 +1,31 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+dist-build/
+dist-v2/
+dist-v3/
+build-output/
+release/
+out/
+
+# 日志
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# 本地工作数据（个人记忆/自动化配置，不应公开）
+.workbuddy/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Electron 打包临时文件
+*.blockmap
+builder-debug.yml
