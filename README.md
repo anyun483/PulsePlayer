@@ -88,7 +88,18 @@
 
 ---
 
-## 运行
+## 下载
+
+不想自己构建的话，直接去 **[Releases](https://github.com/anyun483/PulsePlayer/releases)** 下现成的：
+
+| 文件                                  | 说明                       |
+| ----------------------------------- | ------------------------ |
+| `PulsePlayer-1.1.0-win-x64-portable.exe` | **免安装版**，双击即用，不写注册表 |
+| `PulsePlayer-1.1.0-win-x64-setup.exe`    | 安装版，创建开始菜单 / 桌面快捷方式   |
+
+系统要求：Windows 10 / 11 x64。
+
+## 从源码运行
 
 ```bash
 git clone https://github.com/anyun483/PulsePlayer.git
