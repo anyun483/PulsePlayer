@@ -1,0 +1,30 @@
+# 统一换行符：仓库内文本一律存 LF，避免跨平台协作时整文件 diff
+* text=auto eol=lf
+
+# Shell 脚本必须 LF，否则 Linux/macOS 上 bash 会报 "bad interpreter"
+*.sh    text eol=lf
+
+# Windows 批处理必须 CRLF
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# 二进制文件不做换行转换
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.icns   binary
+*.svg    text eol=lf
+*.woff   binary
+*.woff2  binary
+*.ttf    binary
+*.mp3    binary
+*.flac   binary
+*.wav    binary
+*.exe    binary
+*.dll    binary
+
+# 生成物，折叠在 diff 里
+package-lock.json  linguist-generated=true

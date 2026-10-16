@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  core:
+    name: 核心逻辑测试
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 准备 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # core.test.js 只用 Node 内置模块，不依赖 electron / node_modules，
+      # 所以不需要 npm install，几秒就能跑完。
+      - name: 运行断言
+        run: node test/core.test.js

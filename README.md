@@ -10,6 +10,8 @@
 
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+[![CI](https://github.com/anyun483/PulsePlayer/actions/workflows/ci.yml/badge.svg)](https://github.com/anyun483/PulsePlayer/actions/workflows/ci.yml)
+
 纯本地运行，不联网、不上传、无遥测。零运行时依赖 —— 标签解析、频谱分析、示例曲合成全部自研。
 
 ---
